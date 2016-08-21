@@ -1,0 +1,73 @@
+//*****************************************************************************
+//Title:         SensorSimulators
+//Description:   SensorSimulators description
+//Dependencies:  None
+//Author:        ydhimate
+
+//*****************************************************************************
+
+package com.prosoftgroup.klgame; 
+
+//TODO: Monitors and event definitions here
+
+monitor SensorSimulator{
+
+	sequence<string>  users := ["Carolyn Smith","James Walker","Erin Doe",
+	                            "Chris Bean","Annie Hall", "Shawn Adams", "Pamela Halpert"];
+	sequence<string>  regions := ["Terracotta", "Natural", "GCS", 
+	                              "Meet the Experts", "Registration Desk", "General Entrance", 
+	                              "Prosoft Booth", "Prosoft Booth", "Prosoft Booth",
+	                              "Showcase Entrance", "Registration Entrance", "Prosoft Booth"];
+	string user;
+	string userId;
+	string  currentHall;
+	boolean toggleHall := false;
+		
+	action onload() {
+		DummyEvent dummy;
+		on DummyEvent() :dummy {
+			log dummy.toString();
+			string s;
+			for s in users {
+				user := s;
+				userId := (users.indexOf(user) + 90).toString();
+				spawn simulationHandler();
+			}
+		}
+	}
+
+
+	action simulationHandler() {
+
+		string	beaconId:="Beacon";
+		string	regionLabel;
+		string	timestamp:="";
+		string	eventType:="";
+		// Set initial values 
+		integer randomWait;
+		integer randomHall;
+		integer waitTime;
+		randomWait := 10;
+		waitTime := randomWait.rand()*10;
+
+		if waitTime = 0 then { waitTime := 10; }
+		// Randomly fluctuate values for random seconds
+		on all wait (waitTime.toFloat()) {
+			randomHall := 12;
+			regionLabel := regions[randomHall.rand()]; 
+			if toggleHall = false then {
+				currentHall := regionLabel;
+				toggleHall := true;
+			}
+			else {
+				regionLabel := currentHall;
+				toggleHall := false;
+			}
+			
+		//	print (toggleHall.toString() + "|" + waitTime.toString() + "|" + userId + "|" + user + "|" + regionLabel);
+			
+			route UserObject(userId,user,beaconId,regionLabel,timestamp,eventType);
+		}
+
+	}
+}

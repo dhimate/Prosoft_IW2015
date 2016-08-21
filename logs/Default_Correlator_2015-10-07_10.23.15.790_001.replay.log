@@ -1,0 +1,148 @@
+VERS 00000001 4
+HEAD 00000e4d <?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="/resources/transform.xslt"?><header><componentName>correlator</componentName><version>5.1.0.0</version><build>rel/5.1.0.x@217480</build><buildPlatform>amd64-win64-msvc9</buildPlatform><platform>Windows Server 2008 R2 (Service Pack 1)</platform><cputype>AuthenticAMD family 15 model 8 stepping 0 Six-Core AMD Opteron(tm) Processor 2427</cputype><cpus>4</cpus><javaEnabled>true</javaEnabled><replayLogMode>replayLog</replayLogMode><args><arg>C:\SoftwareAG\Apama 5.1\bin\correlator.exe</arg><arg>--logQueueSizePeriod</arg><arg>0</arg><arg>--port</arg><arg>15903</arg><arg>--loglevel</arg><arg>INFO</arg><arg>--name</arg><arg>Apama Studio Correlator for Prosoft_IW2015(Prosoft_IW2015:Default Correlator)</arg><arg>-j</arg><arg>--jmsConfig</arg><arg>C:\SoftwareAG\ApamaWork_5.1\studio_workspace\.metadata\.plugins\org.eclipse.core.resources\.projects\Prosoft_IW2015\com.apama.text\JMS_Correlator-Integrated_Adapter</arg><arg>--replayLog</arg><arg>logs/Default_Correlator_${START_TIME}_${ID}.replay.log</arg></args><environment><variable>ALLUSERSPROFILE=C:\ProgramData</variable><variable>APAMA_HOME=C:\SoftwareAG\Apama 5.1</variable><variable>APAMA_WORK=C:\SoftwareAG\ApamaWork_5.1</variable><variable>APPDATA=C:\Users\Administrator\AppData\Roaming</variable><variable>CLIENTNAME=PTGHP450-YD</variable><variable>COMMONPROGRAMFILES=C:\Program Files\Common Files</variable><variable>COMMONPROGRAMFILES(X86)=C:\Program Files (x86)\Common Files</variable><variable>COMMONPROGRAMW6432=C:\Program Files\Common Files</variable><variable>COMPUTERNAME=WMSERVER11</variable><variable>COMSPEC=C:\Windows\system32\cmd.exe</variable><variable>FP_NO_HOST_CHECK=NO</variable><variable>HOMEDRIVE=C:</variable><variable>HOMEPATH=\Users\Administrator</variable><variable>LOCALAPPDATA=C:\Users\Administrator\AppData\Local</variable><variable>LOGONSERVER=\\WMSERVER11</variable><variable>NUMBER_OF_PROCESSORS=4</variable><variable>OS=Windows_NT</variable><variable>PATH=C:\SoftwareAG\Apama 5.1\third_party\jre\bin\server;C:\SoftwareAG\Apama 5.1\third_party\jre\bin;C:\SoftwareAG\Apama 5.1\third_party\jre\lib\amd64\server;C:\SoftwareAG\Apama 5.1\third_party\jre\lib\amd64;C:\SoftwareAG\Apama 5.1\bin;C:\ProgramData\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\</variable><variable>PATHEXT=.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC</variable><variable>PROCESSOR_ARCHITECTURE=AMD64</variable><variable>PROCESSOR_IDENTIFIER=AMD64 Family 16 Model 8 Stepping 0, AuthenticAMD</variable><variable>PROCESSOR_LEVEL=16</variable><variable>PROCESSOR_REVISION=0800</variable><variable>PROGRAMDATA=C:\ProgramData</variable><variable>PROGRAMFILES=C:\Program Files</variable><variable>PROGRAMFILES(X86)=C:\Program Files (x86)</variable><variable>PROGRAMW6432=C:\Program Files</variable><variable>PROMPT=$P$G</variable><variable>PSMODULEPATH=C:\Windows\system32\WindowsPowerShell\v1.0\Modules\</variable><variable>PUBLIC=C:\Users\Public</variable><variable>SESSIONNAME=RDP-Tcp#0</variable><variable>SYSTEMDRIVE=C:</variable><variable>SYSTEMROOT=C:\Windows</variable><variable>TEMP=C:\Users\ADMINI~1\AppData\Local\Temp\2</variable><variable>TMP=C:\Users\ADMINI~1\AppData\Local\Temp\2</variable><variable>USERDOMAIN=WMSERVER11</variable><variable>USERNAME=Administrator</variable><variable>USERPROFILE=C:\Users\Administrator</variable><variable>WINDIR=C:\Windows</variable><variable>WINDOWS_TRACING_FLAGS=3</variable><variable>WINDOWS_TRACING_LOGFILE=C:\BVTBin\Tests\installpackage\csilogfile.log</variable></environment><version>5.1.0.0</version></header>
+RAND 0000000a 1122383975
+CONN 00000027 6202926618314831625/3955614762 from R01
+CONN 00000036 6202926618314831625/3482309487 from internal:R:control
+CONN 00000027 6202926618314831625/1865318693 from S01
+TIME 00000010 1444231397.905,1
+CONN 0000003c 4820200116960102775/4820200116960102775 from 127.0.0.1:50704
+TIME 0000000e 1444231398.3,1
+MONF 000003b9 //*****************************************************************************
+// Title:         SensorEvents
+// Description:   SensorEvents description
+// Dependencies:  None
+// Author:        ydhimate
+//
+//*****************************************************************************
+
+package com.prosoftgroup.klgame;
+
+event AddSensor {
+	string	sensorName;
+}
+
+event UserObject {
+	string	userId;
+	string	name;
+	string	beaconId;
+	string	regionLabel;
+	string	timestamp;
+	string	eventType;
+}
+
+event HelloWorld {
+	string message;
+}
+
+event IWStatus {
+	string iwstatus;
+	string destination;
+}
+
+event IWRegion {
+	string iwregion;
+	string destination;
+}
+
+event IWCustomer {
+	string iwcustomer;
+	string destination;
+}
+
+event RegionCount {
+	string regionLabel;
+	integer count;
+}
+
+event UserCount {
+	string userId;
+	string name;
+	integer count;
+}
+
+event DummyEvent {
+	string	userId;
+	string	name;
+
+}
+
+
+ 0000005d C:\SoftwareAG\ApamaWork_5.1\studio_workspace\Prosoft_IW2015\eventdefinitions\SensorEvents.mon
+RMDT 00000015 &INPUT(1,9,true,true)
+MONF 00000741 //*****************************************************************************
+//Title:         SensorSimulators
+//Description:   SensorSimulators description
+//Dependencies:  None
+//Author:        ydhimate
+
+//*****************************************************************************
+
+package com.prosoftgroup.klgame;
+
+//TODO: Monitors and event definitions here
+
+monitor SensorSimulator{
+
+	sequence<string>  users := ["Raj","Ram","Alok","James","Sarayu","Varun","Ankit","Sai","Yogesh","Sreenivas"];
+	sequence<string>  regions := ["Hall A", "Hall B", "Hall C", "Hall D", "Hall E"];
+	string user;
+	string userId;
+	string  currentHall;
+	boolean toggleHall := false;
+		
+	action onload() {
+		DummyEvent dummy;
+		on DummyEvent() :dummy {
+			log dummy.toString();
+			string s;
+			for s in users {
+				user := s;
+				userId := (users.indexOf(user) + 10).toString();
+				spawn simulationHandler();
+			}
+		}
+	}
+
+
+	action simulationHandler() {
+
+		string	beaconId:="Beacon";
+		string	regionLabel;
+		string	timestamp:="";
+		string	eventType:="";
+		// Set initial weather values for location
+		integer randomWait;
+		integer randomHall;
+		integer waitTime;
+		randomWait := 10;
+		waitTime := randomWait.rand()*10;
+
+		if waitTime = 0 then { waitTime := 10; }
+		// Randomly fluctuate weather values for location every 5 seconds
+		on all wait (waitTime.toFloat()) {
+			randomHall := 5;
+			regionLabel := regions[randomHall.rand()]; 
+			if toggleHall = false then {
+				currentHall := regionLabel;
+				toggleHall := true;
+			}
+			else {
+				regionLabel := currentHall;
+				toggleHall := false;
+			}
+			
+		//	print (toggleHall.toString() + "|" + waitTime.toString() + "|" + userId + "|" + user + "|" + regionLabel);
+			
+			route UserObject(userId,user,beaconId,regionLabel,timestamp,eventType);
+		}
+
+	}
+} 00000059 C:\SoftwareAG\ApamaWork_5.1\studio_workspace\Prosoft_IW2015\monitors\SensorSimulators.mon
+RMDT 00000015 &INPUT(1,1,true,true)
+CONN 0000003c 4820606085864622455/4820606085864622455 from 127.0.0.1:50706
+DISC 0000003c 4820606085864622455/4820606085864622455 from 127.0.0.1:50706
+DISC 0000003c 4820200116960102775/4820200116960102775 from 127.0.0.1:50704
+DISC 00000027 6202926618314831625/3955614762 from R01
+DISC 00000036 6202926618314831625/3482309487 from internal:R:control
+DISC 00000027 6202926618314831625/1865318693 from S01

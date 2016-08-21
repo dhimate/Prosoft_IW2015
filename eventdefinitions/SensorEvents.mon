@@ -1,0 +1,60 @@
+//*****************************************************************************
+// Title:         SensorEvents
+// Description:   SensorEvents description
+// Dependencies:  None
+// Author:        ydhimate
+//
+//*****************************************************************************
+
+package com.prosoftgroup.klgame;
+
+event AddSensor {
+	string	sensorName;
+}
+
+event UserObject {
+	string	userId;
+	string	name;
+	string	beaconId;
+	string	regionLabel;
+	string	timestamp;
+	string	eventType;
+}
+
+event HelloWorld {
+	string message;
+}
+
+event IWStatus {
+	string iwstatus;
+	string destination;
+}
+
+event IWRegion {
+	string iwregion;
+	string destination;
+}
+
+event IWCustomer {
+	string iwcustomer;
+	string destination;
+}
+
+event RegionCount {
+	string regionLabel;
+	integer count;
+}
+
+event UserCount {
+	string userId;
+	string name;
+	integer count;
+}
+
+event DummyEvent {
+	string	userId;
+	string	name;
+
+}
+
+

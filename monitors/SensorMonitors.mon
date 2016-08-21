@@ -1,0 +1,332 @@
+//*****************************************************************************
+// Title:         SensorMonitors
+// Description:   SensorMonitors description
+// Dependencies:  None
+// Author:        ydhimate
+//
+//*****************************************************************************
+
+package com.prosoftgroup.klgame; 
+using com.apama.correlator.jms.JMS;
+using com.apama.aggregates.count;
+
+// TODO: Monitors and event definitions here
+
+monitor SensorMonitors {
+	
+	JMS jms;
+	sequence <string> names;
+	UserObject userObject;
+	UserObject idleObject;
+	UserObject staticObject;
+	float regionEntryTime := 0.0;
+	float timeInRegion := 0.0;
+	string currentRegion := "";
+	float dealTime := 0.0;
+	string status := "In Transit";
+	string dealRemark := "Customer moving to another region";
+	
+	constant float IDLE_TRIGGER := 20.0;
+	constant float DEAL_TRIGGER := 45.0;
+	constant float DEAL_WAIT := 3600.0;
+	constant float REGION_HISTORY := 3600.0;
+	constant float STATUS_DELETE := 1800.0;
+	
+	action onload() {
+		 
+		on all UserObject() : userObject {
+			integer index;
+			index := names.indexOf(userObject.userId);
+			
+			if index = -1 then{
+
+				names.append(userObject.userId);
+				spawn sensorHandler (userObject.userId, userObject.name);
+				route userObject;
+			}
+			
+		}
+		
+		stream <UserObject> regionStream := all UserObject();
+		
+		UserObject region;
+		RegionCount rcount;
+		from region in regionStream within REGION_HISTORY
+		  group by region.regionLabel
+		  select RegionCount(region.regionLabel, count()):rcount {
+			emit IWRegion(rcount.regionLabel + "|" + rcount.count.toString(), 
+			              "topic:IWRegion") to "jms:UniversalMessaging-default-sender"; 
+			//print "Count for region " + rcount.regionLabel + " - " + rcount.count.toString(); 
+		}
+		
+//		UserObject user;
+//		UserCount ucount;
+		
+//		from user in regionStream 
+//		  partition by user.regionLabel within 3600.0
+//		  group by user.userId, user.regionLabel
+//		  select UserCount(user.regionLabel, user.userId, count()):ucount {
+//			print "Count for user " + ucount.name + " - " + ucount.count.toString(); 
+//		}
+		
+		jms.onApplicationInitialized();
+		
+		emit HelloWorld("Prosoft IW Demo: Refresh the tables") to "jms:UniversalMessaging-default-sender";
+		
+		route DummyEvent("Prosoft IW Demo", "Refresh complete" );
+	
+	
+	}
+	
+	action sensorHandler (string id, string uname) {
+		UserObject sensorObject;
+		
+		integer lastCount;
+		integer idleCount;
+		integer staticCount;
+		boolean sendDeal := false;
+		
+		
+		stream <UserObject> userStream := all UserObject(userId = id);
+		
+		from userObject in userStream within STATUS_DELETE
+		  select count():lastCount {
+			
+			if lastCount = 0 then {
+				
+				emit IWStatus(userObject.userId + "|" 
+				                + userObject.name + "|"
+				                + currentRegion + "|" 
+				                + status + "|"
+				                + dealRemark + "|"
+				                + sendDeal.toString() + "|"
+				              + "delete" + "|"
+				              + timeInRegion.toString(), "topic:IWStatus") to "jms:UniversalMessaging-default-sender";
+		
+				
+			}
+		}
+		
+		from idleObject in userStream within IDLE_TRIGGER 
+		  select count(): idleCount {
+			
+			//print "IDLE OBJECT :" +idleCount.toString();
+			if idleCount = 0 then {
+				timeInRegion := currentTime - regionEntryTime;
+				
+				if timeInRegion >= DEAL_TRIGGER then {
+					if dealTime = 0.0 then {
+						sendDeal := true;
+						dealTime := currentTime;
+						
+						dealRemark := " Deal sent to " + uname; 
+					
+					}
+					else if (currentTime - dealTime) > DEAL_WAIT then {
+						sendDeal := true;
+						dealTime := currentTime;
+						
+						dealRemark := "Deal sent to " + uname;
+					}
+					else {
+						sendDeal := false;
+						dealRemark := "Deal already sent. Wait for the next deal for " + uname;
+					}
+				}
+				
+				
+				//print "IDLE OBJECT :" + timeInRegion.toString();
+				if (timeInRegion >= IDLE_TRIGGER and timeInRegion < DEAL_TRIGGER) then {
+					status := "Idle";
+					dealRemark := "Customer not moving";
+				}
+				else if (timeInRegion < IDLE_TRIGGER) then {
+					status := "In Transit";
+					dealRemark := "Customer moving to another region";
+				}
+				else if (timeInRegion >= DEAL_TRIGGER) then {
+					status := "Stationary";
+				}
+			
+				emit IWStatus(id + "|" 
+				                + uname + "|"
+				                + currentRegion + "|" 
+				                + status + "|"
+				                + dealRemark + "|"
+				                + sendDeal.toString() + "|"
+				              + "add" + "|"
+				              + timeInRegion.toString(), "topic:IWStatus") to "jms:UniversalMessaging-default-sender";
+
+			}
+		}
+		
+		
+		
+		from idleObject in userStream within DEAL_TRIGGER 
+		  select count(): staticCount {
+			
+			//print "STATIC OBJECT :" +staticCount.toString(); 
+			if staticCount = 0 then {
+				timeInRegion := currentTime - regionEntryTime;
+				
+				if timeInRegion >= DEAL_TRIGGER then {
+					if dealTime = 0.0 then {
+						sendDeal := true;
+						dealTime := currentTime;
+						
+						dealRemark := " Deal sent to " + uname; 
+					
+					}
+					else if (currentTime - dealTime) > DEAL_WAIT then {
+						sendDeal := true;
+						dealTime := currentTime;
+						
+						dealRemark := "Deal sent to " + uname;
+					}
+					else {
+						sendDeal := false;
+						dealRemark := "Deal already sent. Wait for the next deal for " + uname;
+					}
+				}
+				
+				//print "STATIC OBJECT :" + timeInRegion.toString();
+				
+				if (timeInRegion >= IDLE_TRIGGER and timeInRegion < DEAL_TRIGGER) then {
+					status := "Idle";
+					dealRemark := "Customer not moving";
+				}
+				else if (timeInRegion < IDLE_TRIGGER) then {
+					status := "In Transit";
+					dealRemark := "Customer moving to another region";
+				}
+				else if (timeInRegion >= DEAL_TRIGGER) then {
+					status := "Stationary";
+				}
+			
+				emit IWStatus(id + "|" 
+				                + uname + "|"
+				                + currentRegion + "|" 
+				                + status + "|"
+				                + dealRemark + "|"
+				                + sendDeal.toString() + "|"
+				              + "add" + "|"
+				              + timeInRegion.toString(), "topic:IWStatus") to "jms:UniversalMessaging-default-sender";
+			
+			}
+		}
+		
+		
+		
+		on all UserObject(userId=id) : sensorObject {
+			
+			//log "Received event " + sensorObject.toString();
+			
+			if currentRegion = "" then {
+				currentRegion := sensorObject.regionLabel;
+			}
+			
+			if currentRegion = sensorObject.regionLabel then {
+				if regionEntryTime = 0.0 then {
+					regionEntryTime := currentTime;
+				}
+				
+				timeInRegion := currentTime - regionEntryTime;
+				
+				if timeInRegion >= DEAL_TRIGGER then {
+					if dealTime = 0.0 then {
+						sendDeal := true;
+						dealTime := currentTime;
+						
+						dealRemark := " Deal sent to " + sensorObject.name; 
+					
+					}
+					else if (currentTime - dealTime) > DEAL_WAIT then {
+						sendDeal := true;
+						dealTime := currentTime;
+						
+						dealRemark := "Deal sent to " + sensorObject.name;
+					}
+					else {
+						sendDeal := false;
+						dealRemark := "Deal already sent. Wait for the next deal for " + sensorObject.name;
+					}
+				}
+				
+				
+				if (timeInRegion >= IDLE_TRIGGER and timeInRegion < DEAL_TRIGGER) then {
+					status := "Idle";
+					dealRemark := "Customer not moving";
+				}
+				else if (timeInRegion < IDLE_TRIGGER) then {
+					status := "In Transit";
+					dealRemark := "Customer moving to another region";
+				}
+				else if (timeInRegion >= DEAL_TRIGGER) then {
+					status := "Stationary";
+				}
+			} 
+			else {
+				currentRegion := sensorObject.regionLabel;
+				regionEntryTime := currentTime;
+				timeInRegion := currentTime - regionEntryTime;
+				status := "In Transit";
+				dealRemark := "Customer moving to another region";
+				dealTime := 0.0;
+			}
+			
+//			print 	"Region Entry Time " + regionEntryTime.toString() + 
+//			" Region Time " + timeInRegion.toString()+
+//			" Current Region " + currentRegion + 
+//			" Deal time " + dealTime.toString() + 
+//			" Status " + status;
+//			
+			emit IWStatus(sensorObject.userId + "|" 
+			                + sensorObject.name + "|"
+			                + currentRegion + "|" 
+			                + status + "|"
+			                + dealRemark + "|"
+			                + sendDeal.toString() + "|"
+			              + "add" + "|" 
+			              + timeInRegion.toString(), "topic:IWStatus") to "jms:UniversalMessaging-default-sender";
+			
+	
+		}
+	
+		on all wait (13.0) {
+			
+			timeInRegion := currentTime - regionEntryTime;
+
+			
+			if timeInRegion >= DEAL_TRIGGER then {
+				if dealTime = 0.0 then {
+					sendDeal := true;
+					dealTime := currentTime;
+					
+					dealRemark := " Deal sent to " + uname; 
+				
+				}
+				else if (currentTime - dealTime) > DEAL_WAIT then {
+					sendDeal := false;
+					dealTime := currentTime;
+					
+					dealRemark := "Deal sent to " + uname;
+				}
+				else {
+					sendDeal := false;
+					dealRemark := "Deal already sent. Wait for the next deal for " + uname;
+				}
+			}
+			
+			
+			emit IWStatus(id + "|" 
+			                + uname + "|"
+			                + currentRegion + "|" 
+			                + status + "|"
+			                + dealRemark + "|"
+			                + sendDeal.toString() + "|"
+			              + "add" + "|" + timeInRegion.toString(), "topic:IWStatus") to "jms:UniversalMessaging-default-sender";
+	
+	
+		}		
+	}
+}
